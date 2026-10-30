@@ -135,6 +135,7 @@ public class HomePage : ControlHelpers
         }
         //ClickByAutomationId(deviceName);
     }
+
     private async Task SelectDeviceAsync(string deviceName, string side)
     {
         string normalizedDevice = deviceName

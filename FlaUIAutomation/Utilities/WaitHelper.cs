@@ -3,7 +3,6 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUIAutomation.Drivers;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace FlaUIAutomation.Utilities;
@@ -12,8 +11,7 @@ public static class WaitHelper
 {
     public static async Task<AutomationElement> WaitForElementByAutomationIdAsync(
         string automationId,
-        int timeout = 60,
-        CancellationToken cancellationToken = default)
+        int timeout = 60)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(automationId);
 
@@ -25,16 +23,12 @@ public static class WaitHelper
 
         while (DateTime.UtcNow < endTime)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             var desktop = automation.GetDesktop();
             var windows = desktop.FindAllChildren(
                 cf => cf.ByControlType(ControlType.Window));
 
             foreach (var window in windows)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 try
                 {
                     var element = window.FindFirstDescendant(
@@ -56,7 +50,7 @@ public static class WaitHelper
                 }
             }
 
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(500);
         }
 
         throw new TimeoutException(
@@ -66,8 +60,7 @@ public static class WaitHelper
 
     public static async Task<AutomationElement> WaitForElementByNameAsync(
         string name,
-        int timeout = 60,
-        CancellationToken cancellationToken = default)
+        int timeout = 60)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
@@ -79,16 +72,12 @@ public static class WaitHelper
 
         while (DateTime.UtcNow < endTime)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             var desktop = automation.GetDesktop();
             var windows = desktop.FindAllChildren(
                 cf => cf.ByControlType(ControlType.Window));
 
             foreach (var window in windows)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 try
                 {
                     var element = window.FindFirstDescendant(
@@ -109,7 +98,7 @@ public static class WaitHelper
                 }
             }
 
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(500);
         }
 
         throw new TimeoutException(

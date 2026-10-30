@@ -26,90 +26,78 @@ public class HomePage : ControlHelpers
 
 
 
-    public async Task ClickPatientDatabaseAsync(
-    CancellationToken cancellationToken = default)
+    public async Task ClickPatientDatabaseAsync()
     {
         var patientDatabaseButton =
             await SessionManager.SwitchToWindowContainingAutomationIdAsync(
                 PatientDatabaseButtonAutomationId,
-                timeout: TimeSpan.FromSeconds(60),
-                cancellationToken: cancellationToken);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
+                timeout: TimeSpan.FromSeconds(60));
         await ClickElementAsync(
-            patientDatabaseButton,
-            cancellationToken: cancellationToken);
+            patientDatabaseButton);
     }
 
 
 
     public async Task AddNewpatientAsync(
         string firstName,
-        string lastName,
-        CancellationToken cancellationToken = default)
+        string lastName)
     {
         var newPatientButton =
             await SessionManager.SwitchToWindowContainingAutomationIdAsync(NewpatientButtonname);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
         await ClickElementAsync(
-            newPatientButton,
-            cancellationToken: cancellationToken);
+            newPatientButton);
 
         // Keep the rest of your existing patient-creation steps here.
 
         // 3. Enter patient details.
         await EnterTextByAutomationIdAsync(
-            Firstnamefield, firstName, cancellationToken);
+            Firstnamefield, firstName);
 
-        await Task.Delay(1000, cancellationToken);
+        await Task.Delay(1000);
 
         await EnterTextByAutomationIdAsync(
-            Lastnamefield, lastName, cancellationToken);
+            Lastnamefield, lastName);
 
         // 4. Enter audiogram values.
-        await enterAudiogramValuesAsync(cancellationToken);
+        await enterAudiogramValuesAsync();
 
-        await Task.Delay(2000, cancellationToken);
+        await Task.Delay(2000);
 
         // 5. Copy audiogram values and save.
         await ClickByAutomationIdAsync(
-            copytoright, cancellationToken);
+            copytoright);
 
         await ClickByAutomationIdAsync(
-            savebutton, cancellationToken);
+            savebutton);
 
-        await Task.Delay(2000, cancellationToken);
+        await Task.Delay(2000);
 
         // 6. Start the fitting session.
         await ClickByAutomationIdAsync(
-            newsessionbutton, cancellationToken);
+            newsessionbutton);
 
-        await Task.Delay(2000, cancellationToken);
+        await Task.Delay(2000);
 
         // 7. Switch to the window containing Simulate.
         var simulateElement =
             await SessionManager.SwitchToWindowContainingAutomationIdAsync(simulatesession);
 
-        await Task.Delay(2000, cancellationToken);
+        await Task.Delay(2000);
 
         // 8. Click Simulate.
         await ClickElementAsync(
-            simulateElement,
-            cancellationToken: cancellationToken);
+            simulateElement);
     }
 
 
-    private async Task enterAudiogramValuesAsync(CancellationToken cancellationToken)
+    private async Task enterAudiogramValuesAsync()
     {
-        await ClickByAutomationIdAsync(audiogramTab, cancellationToken);
+        await ClickByAutomationIdAsync(audiogramTab);
 
         // Focus the first AC cell (125 Hz).
-        await ClickByAutomationIdAsync("audiogramgrid_input-text_ac-125", cancellationToken);
-        await Task.Delay(1000, cancellationToken);
-        await ClickByAutomationIdAsync("audiogramgrid_input-text_ac-125", cancellationToken);
+        await ClickByAutomationIdAsync("audiogramgrid_input-text_ac-125");
+        await Task.Delay(1000);
+        await ClickByAutomationIdAsync("audiogramgrid_input-text_ac-125");
 
         string[] values =
         {
@@ -121,7 +109,7 @@ public class HomePage : ControlHelpers
         {
             Keyboard.Type(value);
             Keyboard.Press(VirtualKeyShort.TAB);
-            await Task.Delay(1000, cancellationToken);
+            await Task.Delay(1000);
         }
     }
     private void printTree() //string deviceName
@@ -147,7 +135,7 @@ public class HomePage : ControlHelpers
         }
         //ClickByAutomationId(deviceName);
     }
-    private async Task SelectDeviceAsync(string deviceName, string side, CancellationToken cancellationToken)
+    private async Task SelectDeviceAsync(string deviceName, string side)
     {
         string normalizedDevice = deviceName
        .Trim()
@@ -159,7 +147,7 @@ public class HomePage : ControlHelpers
 
         if (normalizedSide == "both")
         {
-            (await FindByNameAsync("Both", cancellationToken: cancellationToken)).Click();
+            (await FindByNameAsync("Both")).Click();
             return;
         }
 
@@ -176,31 +164,31 @@ public class HomePage : ControlHelpers
         Console.WriteLine(
             $"Selecting device: {deviceName}, Side: {side}");
 
-        await ClickByAutomationIdAsync(automationId, cancellationToken);
-        await ClickByAutomationIdAsync(simulatebutton, cancellationToken);
+        await ClickByAutomationIdAsync(automationId);
+        await ClickByAutomationIdAsync(simulatebutton);
     }
     
-    public async Task SelectDeviceWithFullnameAsync(string deviceName, string side, CancellationToken cancellationToken = default)
+    public async Task SelectDeviceWithFullnameAsync(string deviceName, string side)
     {
         if (deviceName.Contains("sn") || deviceName.Contains("SN"))
         {
-            (await FindByNameAsync("ReSound Sensia", cancellationToken: cancellationToken)).Click();
-            await SelectDeviceAsync(deviceName, side, cancellationToken);
+            (await FindByNameAsync("ReSound Sensia")).Click();
+            await SelectDeviceAsync(deviceName, side);
         }
     }
-    public async Task NavigateToFitScreeenAsync(CancellationToken cancellationToken = default)
+    public async Task NavigateToFitScreeenAsync()
     {
-        await Task.Delay(3000, cancellationToken);
-        await SessionManager.SwitchToWindowContainingAutomationIdAsync(pysicalproperties_continue, cancellationToken: cancellationToken);
-        await ClickByAutomationIdAsync(pysicalproperties_continue, cancellationToken);
-        await Task.Delay(3000, cancellationToken);
-        await ClickByAutomationIdAsync(pysicalproperties_continue, cancellationToken);
+        await Task.Delay(3000);
+        await SessionManager.SwitchToWindowContainingAutomationIdAsync(pysicalproperties_continue);
+        await ClickByAutomationIdAsync(pysicalproperties_continue);
+        await Task.Delay(3000);
+        await ClickByAutomationIdAsync(pysicalproperties_continue);
     }
-    public async Task SelectExixtingPatientAsync(string firstName, CancellationToken cancellationToken = default)
+    public async Task SelectExixtingPatientAsync(string firstName)
     {
-        await SessionManager.SwitchToWindowContainingAutomationIdAsync(NewpatientButtonname, cancellationToken: cancellationToken);
-        var element = await FindByNameAsync(firstName, cancellationToken: cancellationToken);
+        await SessionManager.SwitchToWindowContainingAutomationIdAsync(NewpatientButtonname);
+        var element = await FindByNameAsync(firstName);
         MoveMouseToElement(element);
-        await ClickByAutomationIdAsync(viewbutton_patientlist, cancellationToken);
+        await ClickByAutomationIdAsync(viewbutton_patientlist);
     }
 }

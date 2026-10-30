@@ -1,4 +1,4 @@
-﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
 using FlaUIAutomation.Drivers;
@@ -21,57 +21,57 @@ namespace FlaUIAutomation.Pages
         private const string firstnamefield = "FirstName";
 
 
-        public Task EnterPasswordAsync(string password, CancellationToken cancellationToken = default)
+        public Task EnterPasswordAsync(string password)
         {
-            return EnterTextByAutomationIdAsync(passwordfield, password, cancellationToken);
+            return EnterTextByAutomationIdAsync(passwordfield, password);
         }
 
-        public async Task ClickOKButtonAsync(CancellationToken cancellationToken = default)
+        public async Task ClickOKButtonAsync()
         {
-            await ClickByAutomationIdAsync(OKButton, cancellationToken);
-            await Task.Delay(2000, cancellationToken);
+            await ClickByAutomationIdAsync(OKButton);
+            await Task.Delay(2000);
         }
 
 
 
-        public async Task AddPatientAsync(string fname, string lname, CancellationToken cancellationToken = default)
+        public async Task AddPatientAsync(string fname, string lname)
         {
-            await SessionManager.ReattachMainWindowAsync(cancellationToken: cancellationToken);
+            await SessionManager.ReattachMainWindowAsync();
             Console.WriteLine("========== AFTER REATTACH ==========");
-            await ClickByAutomationIdAsync("cmdAddPatient", cancellationToken);
-            await SessionManager.ReattachMainWindowAsync(cancellationToken: cancellationToken);
-            await EnterTextByAutomationIdAsync(lastnamefield, lname, cancellationToken);
-            await EnterTextByAutomationIdAsync(firstnamefield, fname, cancellationToken);
-            (await FindByNameAsync("Male", cancellationToken: cancellationToken)).Click();
-            (await FindByNameAsync("OK", cancellationToken: cancellationToken)).Click();
-            await SessionManager.ReattachMainWindowAsync(cancellationToken: cancellationToken);
-            await Task.Delay(4000, cancellationToken);
+            await ClickByAutomationIdAsync("cmdAddPatient");
+            await SessionManager.ReattachMainWindowAsync();
+            await EnterTextByAutomationIdAsync(lastnamefield, lname);
+            await EnterTextByAutomationIdAsync(firstnamefield, fname);
+            (await FindByNameAsync("Male")).Click();
+            (await FindByNameAsync("OK")).Click();
+            await SessionManager.ReattachMainWindowAsync();
+            await Task.Delay(4000);
             // Open the module
             Console.WriteLine("===== STEP 1: BEFORE FILE MENU =====");
-            (await FindByNameAsync("_File", cancellationToken: cancellationToken)).Click();
-            await Task.Delay(1000, cancellationToken);
+            (await FindByNameAsync("_File")).Click();
+            await Task.Delay(1000);
             Console.WriteLine("===== STEP 2: AFTER FILE MENU =====");
             Console.WriteLine("===== STEP 3: CLICK OPEN =====");
-            (await FindByNameAsync("Open", cancellationToken: cancellationToken)).Click();
-            await Task.Delay(1000, cancellationToken);
-            (await FindByNameAsync("Noah 4 Audiogram Module", cancellationToken: cancellationToken)).Click();
-            await Task.Delay(2000, cancellationToken);
-            await SessionManager.SwitchToWindowAsync("Audiogram Module", cancellationToken: cancellationToken);
+            (await FindByNameAsync("Open")).Click();
+            await Task.Delay(1000);
+            (await FindByNameAsync("Noah 4 Audiogram Module")).Click();
+            await Task.Delay(2000);
+            await SessionManager.SwitchToWindowAsync("Audiogram Module");
             Console.WriteLine("===== STEP 4: AFTER OPEN =====");
             Console.WriteLine("===============Inspect Audiogram Grid==================");
-            await Task.Delay(1500, cancellationToken);
+            await Task.Delay(1500);
             //SessionManager.InspectAudiogramGrid();
 
-            await enterAudiogramValuesAsync(cancellationToken);
-            await SessionManager.CloseWindowAsync("Audiogram Module", cancellationToken: cancellationToken);
-            await Task.Delay(3000, cancellationToken);
+            await enterAudiogramValuesAsync();
+            await SessionManager.CloseWindowAsync("Audiogram Module");
+            await Task.Delay(3000);
             SessionManager.ClickSaveMeasurementOK();
 
-            await Task.Delay(6000, cancellationToken);
+            await Task.Delay(6000);
             //SessionManager.CloseWindow("Audiogram Module");
         }
         private const string audiogramcell = "Item: Himsa.Noah.CommonControls.TestValuesViewModel, Column Display Index: 0"; // Name	Item: Himsa.Noah.CommonControls.TestValuesViewModel, Column Display Index: 0
-        private async Task enterAudiogramValuesAsync(CancellationToken cancellationToken)
+        private async Task enterAudiogramValuesAsync()
         {
             var window = AutomationManager.MainWindow
                 ?? throw new InvalidOperationException(
@@ -84,7 +84,7 @@ namespace FlaUIAutomation.Pages
                     cf => cf.ByName(audiogramcell));
                 if (cell != null)
                     break;
-                await Task.Delay(500, cancellationToken);
+                await Task.Delay(500);
             }
             if (cell == null)
             {
@@ -118,17 +118,17 @@ namespace FlaUIAutomation.Pages
                     "Audiogram cell was not found. Check the candidate output.");
             }
             cell.Click();
-            await Task.Delay(200, cancellationToken);
+            await Task.Delay(200);
             Keyboard.Type("50");
-            await Task.Delay(200, cancellationToken);
+            await Task.Delay(200);
             for (int i = 0; i < 13; i++)
             {
                 Keyboard.Press(VirtualKeyShort.TAB);
-                await Task.Delay(100, cancellationToken);
+                await Task.Delay(100);
                 Keyboard.Press(VirtualKeyShort.TAB);
-                await Task.Delay(100, cancellationToken);
+                await Task.Delay(100);
                 Keyboard.Type("40");
-                await Task.Delay(200, cancellationToken);
+                await Task.Delay(200);
             }
         }
 
@@ -179,14 +179,14 @@ namespace FlaUIAutomation.Pages
                 PrintElementTree(child, level + 1);
             }
         }
-        public async Task LaunchFswAsync(string fsw, CancellationToken cancellationToken = default)
+        public async Task LaunchFswAsync(string fsw)
         {
-            await SessionManager.SwitchToWindowAsync("Noah 4", cancellationToken: cancellationToken);
-            (await FindByNameAsync("_File", cancellationToken: cancellationToken)).Click();
-            await Task.Delay(1000, cancellationToken);
-            (await FindByNameAsync("Open", cancellationToken: cancellationToken)).Click();
-            await Task.Delay(1000, cancellationToken);
-            (await FindByNameContainsAsync(fsw, cancellationToken: cancellationToken)).Click();
+            await SessionManager.SwitchToWindowAsync("Noah 4");
+            (await FindByNameAsync("_File")).Click();
+            await Task.Delay(1000);
+            (await FindByNameAsync("Open")).Click();
+            await Task.Delay(1000);
+            (await FindByNameContainsAsync(fsw)).Click();
         }
 
     }

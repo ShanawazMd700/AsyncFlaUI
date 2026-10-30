@@ -4,8 +4,6 @@ using FlaUI.Core.Definitions;
 using FlaUI.UIA3;
 using System;
 using System.Linq;
-using System.Threading;
-
 namespace FlaUIAutomation.Drivers;
 public static class SessionManager
 {
@@ -19,14 +17,14 @@ public static class SessionManager
         AutomationManager.Automation = new UIA3Automation();
     }
 
-    public static async Task AttachApplicationAsync(Application application, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    public static async Task AttachApplicationAsync(Application application, TimeSpan? timeout = null)
     {
         StartSession();
 
         AutomationManager.Application = application;
-        AutomationManager.MainWindow = await WaitForMainWindowAsync(application, timeout ?? TimeSpan.FromSeconds(30), cancellationToken);
+        AutomationManager.MainWindow = await WaitForMainWindowAsync(application, timeout ?? TimeSpan.FromSeconds(30));
     }
-    public static async Task ReattachMainWindowAsync(TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    public static async Task ReattachMainWindowAsync(TimeSpan? timeout = null)
     {
         if (AutomationManager.Application == null)
         {
@@ -37,7 +35,7 @@ public static class SessionManager
         AutomationManager.MainWindow =
             await WaitForMainWindowAsync(
                 AutomationManager.Application,
-                timeout ?? TimeSpan.FromSeconds(30), cancellationToken);
+                timeout ?? TimeSpan.FromSeconds(30));
 
        // Console.WriteLine(
             //$"Re-attached Window: " +
@@ -62,7 +60,7 @@ public static class SessionManager
 
     private static async Task<Window> WaitForMainWindowAsync(
     Application application,
-    TimeSpan timeout, CancellationToken cancellationToken)
+    TimeSpan timeout)
     {
         var endTime = DateTime.UtcNow + timeout;
 
@@ -91,7 +89,7 @@ public static class SessionManager
                 return smartFitWindow;
             }
 
-            await Task.Delay(1000, cancellationToken);
+            await Task.Delay(1000);
         }
 
         throw new TimeoutException(
@@ -99,7 +97,7 @@ public static class SessionManager
     }
     public static async Task<Window> AttachToWindowAsync(
     Func<Window, bool> condition,
-    TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    TimeSpan? timeout = null)
     {
         if (AutomationManager.Application == null)
         {
@@ -138,7 +136,7 @@ public static class SessionManager
                 }
             }
 
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(500);
         }
 
         throw new TimeoutException(
@@ -160,7 +158,7 @@ public static class SessionManager
 
     public static async Task SwitchToWindowAsync(
         string windowName,
-    TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    TimeSpan? timeout = null)
     {
         if (string.IsNullOrWhiteSpace(windowName))
         {
@@ -221,7 +219,7 @@ public static class SessionManager
                 }
             }
 
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(500);
         }
 
         throw new TimeoutException(
@@ -270,75 +268,10 @@ public static class SessionManager
             }
         }
     }
-
-
-    //public static async Task<AutomationElement>
-    // SwitchToWindowContainingAutomationIdAsync(
-    //     string automationId,
-    //     TimeSpan? timeout = null,
-    //     CancellationToken cancellationToken = default)
-    //{
-    //    if (AutomationManager.Automation == null)
-    //    {
-    //        throw new InvalidOperationException(
-    //            "UI Automation is not initialized. Call StartSession() first.");
-    //    }
-
-    //    var waitTime = timeout ?? TimeSpan.FromSeconds(15);
-    //    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-    //    while (stopwatch.Elapsed < waitTime)
-    //    {
-    //        cancellationToken.ThrowIfCancellationRequested();
-
-    //        var desktop = AutomationManager.Automation.GetDesktop();
-
-    //        var windows = desktop.FindAllChildren(
-    //            cf => cf.ByControlType(
-    //                FlaUI.Core.Definitions.ControlType.Window));
-
-    //        foreach (var element in windows)
-    //        {
-    //            cancellationToken.ThrowIfCancellationRequested();
-
-    //            try
-    //            {
-    //                var match = element.FindFirstDescendant(
-    //                    cf => cf.ByAutomationId(automationId));
-
-    //                if (match == null)
-    //                    continue;
-
-    //                var window = element.AsWindow();
-
-    //                AutomationManager.MainWindow = window;
-    //                window.Focus();
-
-    //                Console.WriteLine(
-    //                    $"Switched to window '{window.Title}' containing " +
-    //                    $"AutomationId '{automationId}'.");
-
-    //                return match;
-    //            }
-    //            catch (Exception ex)
-    //            {
-    //                Console.WriteLine(
-    //                    $"Could not inspect window: {ex.Message}");
-    //            }
-    //        }
-
-    //        await Task.Delay(500, cancellationToken);
-    //    }
-
-    //    throw new TimeoutException(
-    //        $"No window containing AutomationId '{automationId}' was found " +
-    //        $"within {waitTime.TotalSeconds} seconds.");
-    //}
     public static async Task<AutomationElement>
         SwitchToWindowContainingAutomationIdAsync(
             string automationId,
-            TimeSpan? timeout = null,
-            CancellationToken cancellationToken = default)
+            TimeSpan? timeout = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(automationId);
 
@@ -351,8 +284,6 @@ public static class SessionManager
 
         while (DateTime.UtcNow < endTime)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             var desktop = automation.GetDesktop();
 
             var windows = desktop.FindAllChildren(
@@ -385,7 +316,7 @@ public static class SessionManager
                 }
             }
 
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(500);
         }
 
         throw new TimeoutException(
@@ -394,7 +325,7 @@ public static class SessionManager
     }
     public static async Task CloseWindowAsync(
         string windowName,
-    TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    TimeSpan? timeout = null)
     {
         if (string.IsNullOrWhiteSpace(windowName))
         {
@@ -466,7 +397,7 @@ public static class SessionManager
                 }
             }
 
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(500);
         }
 
         throw new TimeoutException(

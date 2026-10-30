@@ -4,25 +4,22 @@ using FlaUI.Core.Tools;
 using FlaUIAutomation.Drivers;
 using FlaUI.Core.Conditions;
 using System;
-using System.Threading;
 using FlaUI.Core.Definitions;
 
 namespace FlaUIAutomation.Utilities;
 
 public class ControlHelpers
 {
-    protected Task<AutomationElement> FindByAutomationIdAsync(string automationId, int timeout = 90, CancellationToken cancellationToken = default) =>
-        WaitHelper.WaitForElementByAutomationIdAsync(automationId, timeout, cancellationToken);
-    protected Task<AutomationElement> FindByNameAsync(string name, int timeout = 90, CancellationToken cancellationToken = default) =>
-        WaitHelper.WaitForElementByNameAsync(name, timeout, cancellationToken);
+    protected Task<AutomationElement> FindByAutomationIdAsync(string automationId, int timeout = 90) =>
+        WaitHelper.WaitForElementByAutomationIdAsync(automationId, timeout);
+    protected Task<AutomationElement> FindByNameAsync(string name, int timeout = 90) =>
+        WaitHelper.WaitForElementByNameAsync(name, timeout);
 
     protected async Task ClickByAutomationIdAsync(
-        string automationId,
-        CancellationToken cancellationToken = default)
+        string automationId)
     {
         var element = await FindByAutomationIdAsync(
-            automationId,
-            cancellationToken: cancellationToken);
+            automationId);
 
         if (element == null)
         {
@@ -37,29 +34,29 @@ public class ControlHelpers
         element.Click();
     }
 
-    protected async Task EnterTextByAutomationIdAsync(string automationId, string text, CancellationToken cancellationToken = default)
+    protected async Task EnterTextByAutomationIdAsync(string automationId, string text)
     {
-        var element = await FindByAutomationIdAsync(automationId, cancellationToken: cancellationToken);
+        var element = await FindByAutomationIdAsync(automationId);
         element.Focus();
         element.AsTextBox().Enter(text);
     }
-    protected async Task EnterTextByNameAsync(string name, string text, CancellationToken cancellationToken = default)
+    protected async Task EnterTextByNameAsync(string name, string text)
     {
-        var element = await FindByNameAsync(name, cancellationToken: cancellationToken);
+        var element = await FindByNameAsync(name);
         element.Focus();
         element.AsTextBox().Enter(text);
     }
-    protected async Task<string> GetTextByAutomationIdAsync(string automationId, CancellationToken cancellationToken = default)
+    protected async Task<string> GetTextByAutomationIdAsync(string automationId)
     {
-        var element = await FindByAutomationIdAsync(automationId, cancellationToken: cancellationToken);
+        var element = await FindByAutomationIdAsync(automationId);
         return element.AsLabel()?.Text ?? element.Name;
     }
-    protected async Task<bool> IsDisplayedByAutomationIdAsync(string automationId, CancellationToken cancellationToken = default) =>
-        !(await FindByAutomationIdAsync(automationId, cancellationToken: cancellationToken)).Properties.IsOffscreen.ValueOrDefault;
+    protected async Task<bool> IsDisplayedByAutomationIdAsync(string automationId) =>
+        !(await FindByAutomationIdAsync(automationId)).Properties.IsOffscreen.ValueOrDefault;
 
     public static async Task ClickElementAsync(
     AutomationElement element,
-    bool useCoordinateFallback = true, CancellationToken cancellationToken = default)
+    bool useCoordinateFallback = true)
     {
         if (element == null)
         {
@@ -124,7 +121,7 @@ public class ControlHelpers
             var y = (int)(bounds.Top + bounds.Height / 2);
 
             Mouse.Click(new System.Drawing.Point(x, y));
-            await Task.Delay(200, cancellationToken);
+            await Task.Delay(200);
 
             Console.WriteLine(
                 $"Clicked using coordinates ({x}, {y}).");
@@ -139,7 +136,7 @@ public class ControlHelpers
     public static async Task ClickByNameAsync(
         AutomationElement root,
         string name,
-    bool useCoordinateFallback = true, CancellationToken cancellationToken = default)
+    bool useCoordinateFallback = true)
     {
         var element = root.FindFirstDescendant(
             cf => cf.ByName(name));
@@ -150,9 +147,9 @@ public class ControlHelpers
                 $"Element with name '{name}' was not found.");
         }
 
-        await ClickElementAsync(element, useCoordinateFallback, cancellationToken);
+        await ClickElementAsync(element, useCoordinateFallback);
     }
-    public async Task<AutomationElement> FindByNameContainsAsync(string name, int timeout = 10, CancellationToken cancellationToken = default)
+    public async Task<AutomationElement> FindByNameContainsAsync(string name, int timeout = 10)
     {
         var window = AutomationManager.MainWindow
             ?? throw new InvalidOperationException("Main window is not attached.");
@@ -160,10 +157,9 @@ public class ControlHelpers
         var endTime = DateTime.UtcNow.AddSeconds(timeout);
         while (DateTime.UtcNow < endTime)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             var element = window.FindFirstDescendant(cf => cf.ByName(name, PropertyConditionFlags.MatchSubstring));
             if (element != null) return element;
-            await Task.Delay(250, cancellationToken);
+            await Task.Delay(250);
         }
         throw new TimeoutException($"Element containing name '{name}' was not found.");
     }

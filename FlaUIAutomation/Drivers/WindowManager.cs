@@ -1,12 +1,10 @@
-﻿using FlaUI.Core;
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.UIA3;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
-
 namespace FlaUIAutomation.Drivers
 {
     public static class WindowManager
@@ -16,7 +14,7 @@ namespace FlaUIAutomation.Drivers
         public static async Task<Window> GetWindowOrThrowAsync(
         string processName,
         int maxRetries = 20,
-        int retryDelayMs = 500, CancellationToken cancellationToken = default)
+        int retryDelayMs = 500)
         {
             for (int i = 0; i < maxRetries; i++)
             {
@@ -52,7 +50,7 @@ namespace FlaUIAutomation.Drivers
                         ex.Message);
                 }
 
-                await Task.Delay(retryDelayMs, cancellationToken);
+                await Task.Delay(retryDelayMs);
             }
 
             throw new TimeoutException(
@@ -62,7 +60,7 @@ namespace FlaUIAutomation.Drivers
 
         public static async Task<Window> WaitForWindowByTitleAsync(
             string title,
-        TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+        TimeSpan? timeout = null)
         {
             var app = AutomationManager.Application
                 ?? throw new InvalidOperationException(
@@ -100,7 +98,7 @@ namespace FlaUIAutomation.Drivers
                     }
                 }
 
-                await Task.Delay(500, cancellationToken);
+                await Task.Delay(500);
             }
 
             throw new TimeoutException(
@@ -110,7 +108,7 @@ namespace FlaUIAutomation.Drivers
 
         public static async Task<Window> WaitForNewWindowAsync(
             Window[] previousWindows,
-        TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+        TimeSpan? timeout = null)
         {
             var app = AutomationManager.Application
                 ?? throw new InvalidOperationException(
@@ -151,7 +149,7 @@ namespace FlaUIAutomation.Drivers
                     }
                 }
 
-                await Task.Delay(500, cancellationToken);
+                await Task.Delay(500);
             }
 
             throw new TimeoutException(

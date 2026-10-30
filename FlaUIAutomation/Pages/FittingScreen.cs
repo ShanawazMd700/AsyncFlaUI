@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using FlaUI.Core.WindowsAPI;
@@ -16,13 +16,13 @@ namespace FlaUIAutomation.Pages
 
 
 
-        public async Task SaveSessionAsync(CancellationToken cancellationToken = default)
+        public async Task SaveSessionAsync()
         {
-            await ClickByAutomationIdAsync(savebutton, cancellationToken);
+            await ClickByAutomationIdAsync(savebutton);
             //SessionManager.SwitchToWindowContainingAutomationId(exitbutton);
-            await Task.Delay(5000, cancellationToken);
-            await ClickByAutomationIdAsync(exitbutton, cancellationToken);
-            await Task.Delay(2000, cancellationToken);
+            await Task.Delay(5000);
+            await ClickByAutomationIdAsync(exitbutton);
+            await Task.Delay(2000);
         }
 
     }

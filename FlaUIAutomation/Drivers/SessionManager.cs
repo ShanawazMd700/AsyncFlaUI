@@ -302,7 +302,11 @@ public static class SessionManager
 
                         AutomationManager.MainWindow = window;
                         window.Focus();
+                        Console.WriteLine(
+                         $"Application attached: {AutomationManager.Application != null}");
 
+                        Console.WriteLine(
+                            $"MainWindow assigned: {AutomationManager.MainWindow != null}");
                         Console.WriteLine(
                             $"Switched to window '{window.Name}' " +
                             $"containing AutomationId '{automationId}'.");

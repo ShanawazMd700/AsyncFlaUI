@@ -1,3 +1,4 @@
+
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.UIA3;
@@ -6,39 +7,40 @@ namespace FlaUIAutomation.Drivers;
 
 public static class AutomationManager
 {
-    private static readonly AsyncLocal<UIA3Automation?> CurrentAutomation = new();
-    private static readonly AsyncLocal<Application?> CurrentApplication = new();
-    private static readonly AsyncLocal<Window?> CurrentMainWindow = new();
+    private static UIA3Automation? _automation;
+    private static Application? _application;
+    private static Window? _mainWindow;
 
     public static UIA3Automation Automation
     {
-        get => CurrentAutomation.Value
-            ?? throw new InvalidOperationException("FlaUI automation session has not been started.");
-        set => CurrentAutomation.Value = value;
+        get => _automation
+            ?? throw new InvalidOperationException(
+                "FlaUI automation session has not been started.");
+        set => _automation = value;
     }
 
     public static Application? Application
     {
-        get => CurrentApplication.Value;
-        set => CurrentApplication.Value = value;
+        get => _application;
+        set => _application = value;
     }
 
     public static Window? MainWindow
     {
-        get => CurrentMainWindow.Value;
-        set => CurrentMainWindow.Value = value;
+        get => _mainWindow;
+        set => _mainWindow = value;
     }
 
     public static AutomationElement Desktop => Automation.GetDesktop();
 
     public static AutomationElement SearchRoot => MainWindow ?? Desktop;
 
-    public static bool IsStarted => CurrentAutomation.Value is not null;
+    public static bool IsStarted => _automation != null;
 
     public static void Clear()
     {
-        CurrentMainWindow.Value = null;
-        CurrentApplication.Value = null;
-        CurrentAutomation.Value = null;
+        _mainWindow = null;
+        _application = null;
+        _automation = null;
     }
 }

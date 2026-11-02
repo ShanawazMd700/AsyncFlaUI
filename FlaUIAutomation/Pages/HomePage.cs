@@ -1,9 +1,11 @@
+using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Definitions;
+using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
 using FlaUIAutomation.Drivers;
 using FlaUIAutomation.Utilities;
 using System.Reflection.Metadata;
 using System.Security.Cryptography;
-using FlaUI.Core.Input;
 
 namespace FlaUIAutomation.Pages;
 
@@ -145,11 +147,15 @@ public class HomePage : ControlHelpers
         string normalizedSide = side
             .Trim()
             .ToLowerInvariant();
+        Thread.Sleep(2000);
 
         if (normalizedSide == "both")
         {
-            (await FindByNameAsync("Both")).Click();
-            return;
+            string right =$"catalogproduct_radio-button_right-{normalizedDevice}";
+            string left =$"catalogproduct_radio-button_left-{normalizedDevice}";
+            await ClickByAutomationIdAsync(right);
+            await ClickByAutomationIdAsync(left);
+            await ClickByAutomationIdAsync(simulatebutton);
         }
 
         if (normalizedSide != "right" && normalizedSide != "left")
@@ -162,20 +168,25 @@ public class HomePage : ControlHelpers
         string automationId =
             $"catalogproduct_radio-button_{normalizedSide}-{normalizedDevice}";
 
-        Console.WriteLine(
-            $"Selecting device: {deviceName}, Side: {side}");
-
         await ClickByAutomationIdAsync(automationId);
         await ClickByAutomationIdAsync(simulatebutton);
     }
-    
-    public async Task SelectDeviceWithFullnameAsync(string deviceName, string side)
+
+    public async Task SelectDeviceWithFullnameAsync(
+        string deviceName,
+        string side)
     {
-        if (deviceName.Contains("sn") || deviceName.Contains("SN"))
-        {
-            (await FindByNameAsync("ReSound Sensia")).Click();
-            await SelectDeviceAsync(deviceName, side);
-        }
+        await SessionManager.SwitchToWindowContainingAutomationIdAsync(
+            "filters_button_filter");
+
+        string familyName = GetDeviceFamily(deviceName);
+
+        await FindDeviceWithScrollAsync(
+            deviceName,
+            familyName,
+            side);
+
+        await SelectDeviceAsync(deviceName, side);
     }
     public async Task NavigateToFitScreeenAsync()
     {
@@ -192,4 +203,159 @@ public class HomePage : ControlHelpers
         MoveMouseToElement(element);
         await ClickByAutomationIdAsync(viewbutton_patientlist);
     }
+
+    private async Task<AutomationElement> FindByNameContainsAsync(
+     string name,
+     int timeout = 10)
+    {
+        var automation = AutomationManager.Automation
+            ?? throw new InvalidOperationException(
+                "UI Automation is not initialized.");
+
+        var application = AutomationManager.Application
+            ?? throw new InvalidOperationException(
+                "Application is not attached.");
+
+        var endTime = DateTime.UtcNow.AddSeconds(timeout);
+
+        while (DateTime.UtcNow < endTime)
+        {
+            var windows = application.GetAllTopLevelWindows(automation);
+
+            foreach (var window in windows)
+            {
+                try
+                {
+                    var element = window.FindFirstDescendant(
+                        cf => cf.ByName(
+                            name,
+                            PropertyConditionFlags.MatchSubstring));
+
+                    if (element != null)
+                    { 
+                        return element;
+                    }
+                }
+                catch (System.Runtime.InteropServices.COMException)
+                {
+                    // Window may become unavailable during inspection.
+                }
+            }
+
+            await Task.Delay(250);
+        }
+
+        throw new TimeoutException(
+            $"Element containing name '{name}' was not found " +
+            $"within {timeout} seconds.");
+    }
+
+    private async Task<AutomationElement> FindDeviceWithScrollAsync(
+    string deviceName,
+    string familyName,
+    string side,
+    int maxScrollAttempts = 20)
+    {
+        string normalizedDevice = deviceName.Trim().ToLowerInvariant();
+        string normalizedSide = side.Trim().ToLowerInvariant();
+
+        string deviceAutomationId =
+            $"catalogproduct_radio-button_{normalizedSide}-{normalizedDevice}";
+
+        // Find the family heading.
+        var familyElement = await FindByNameContainsAsync(familyName);
+
+
+        // Expand the family.
+        familyElement.Click();
+
+        await Task.Delay(1500);
+
+        // Search immediately after expanding.
+        var deviceElement = FindByAutomationId(deviceAutomationId);
+
+        if (deviceElement != null)
+        {
+            return deviceElement;
+        }
+
+        // Print the actual controls exposed by the UI Automation tree.
+        Console.WriteLine(
+            $"Device not found immediately. Inspecting catalog controls...");
+
+        // Only scroll if the exact device control is not found.
+        MoveMouseToElement(familyElement);
+
+        for (int attempt = 1; attempt <= maxScrollAttempts; attempt++)
+        {
+            Console.WriteLine(
+                $"Device '{deviceName}' not found. Scroll attempt {attempt}/{maxScrollAttempts}");
+
+            Mouse.Scroll(-3);
+
+            await Task.Delay(700);
+
+            deviceElement = FindByAutomationId(deviceAutomationId);
+
+            if (deviceElement != null)
+            {
+                Console.WriteLine(
+                    $"Found device after scroll attempt {attempt}: {deviceAutomationId}");
+
+                return deviceElement;
+            }
+        }
+        throw new TimeoutException(
+            $"Device AutomationId '{deviceAutomationId}' was not found " +
+            $"in '{familyName}' after {maxScrollAttempts} scroll attempts.");
+    }
+
+    private string GetDeviceFamily(string deviceName)
+    {
+        if (deviceName.StartsWith(
+            "SN", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound Sensia";
+        }
+
+        if (deviceName.StartsWith(
+            "VI", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound Vivia";
+        }
+        if (deviceName.StartsWith(
+        "NX", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound Nexia";
+        }
+        if (deviceName.StartsWith(
+        "EI", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound Enzo IA";
+        }
+        if (deviceName.StartsWith(
+        "SA", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound Savi";
+        }
+        if (deviceName.StartsWith(
+        "RT", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound One";
+        }
+        if (deviceName.StartsWith(
+        "RU", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound Omnia";
+        }
+        if (deviceName.StartsWith(
+        "RE", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ReSound Linx Quattro";
+        }
+        throw new ArgumentException(
+            $"Unknown device model: {deviceName}");
+    }
+
+
 }

@@ -12,6 +12,15 @@ public class ControlHelpers
 {
     protected Task<AutomationElement> FindByAutomationIdAsync(string automationId, int timeout = 90) =>
         WaitHelper.WaitForElementByAutomationIdAsync(automationId, timeout);
+    protected AutomationElement? FindByAutomationId(string automationId)
+    {
+        var window = AutomationManager.MainWindow
+            ?? throw new InvalidOperationException(
+                "Main window is not attached.");
+
+        return window.FindFirstDescendant(
+            cf => cf.ByAutomationId(automationId));
+    }
     protected Task<AutomationElement> FindByNameAsync(string name, int timeout = 90) =>
         WaitHelper.WaitForElementByNameAsync(name, timeout);
 
@@ -26,10 +35,6 @@ public class ControlHelpers
             throw new InvalidOperationException(
                 $"WaitHelper returned null for AutomationId '{automationId}'.");
         }
-
-        Console.WriteLine(
-            $"Clicking AutomationId='{automationId}', " +
-            $"Name='{element.Name}', Type='{element.ControlType}'");
 
         element.Click();
     }
@@ -63,10 +68,6 @@ public class ControlHelpers
             throw new ArgumentNullException(nameof(element));
         }
 
-        Console.WriteLine(
-            $"Clicking element: Name='{element.Name}', " +
-            $"Type='{element.ControlType}', " +
-            $"AutomationId='{element.AutomationId}'");
 
         // Attempt 1: Use the element's normal click implementation.
         try
@@ -94,7 +95,6 @@ public class ControlHelpers
                      FlaUI.Core.Definitions.ControlType.Custom))
             {
                 parent.Click();
-                Console.WriteLine("Clicked using parent element.");
                 return;
             }
         }
@@ -164,26 +164,37 @@ public class ControlHelpers
         throw new TimeoutException($"Element containing name '{name}' was not found.");
     }
     public static void MoveMouseToElement(AutomationElement element)
-{
-    if (element == null)
     {
-        throw new ArgumentNullException(nameof(element));
+        ArgumentNullException.ThrowIfNull(element);
+
+        var bounds = element.BoundingRectangle;
+
+        if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+        {
+            throw new InvalidOperationException(
+                $"Cannot move mouse: element '{element.Name}' has no usable screen bounds.");
+        }
+
+        int x = (int)(bounds.Left + bounds.Width / 2);
+        int y = (int)(bounds.Top + bounds.Height / 2);
+
+        Mouse.MoveTo(new System.Drawing.Point(x, y));
+
+        Console.WriteLine(
+            $"Moved mouse to element: Name='{element.Name}', X={x}, Y={y}");
     }
 
-    var bounds = element.BoundingRectangle;
 
-    if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+    public AutomationElement? FindElementByNameContains(string name)
     {
-        throw new InvalidOperationException(
-            $"Cannot move mouse: element '{element.Name}' has no usable screen bounds.");
+        var window = AutomationManager.MainWindow
+            ?? throw new InvalidOperationException(
+                "Main window is not attached.");
+
+        return window.FindFirstDescendant(
+            cf => cf.ByName(
+                name,
+                PropertyConditionFlags.MatchSubstring));
     }
 
-    int x = (int)(bounds.Left + bounds.Width / 2);
-    int y = (int)(bounds.Top + bounds.Height / 2);
-
-    Mouse.MoveTo(new System.Drawing.Point(x, y));
-
-    Console.WriteLine(
-        $"Moved mouse to element: Name='{element.Name}', X={x}, Y={y}");
-}
 }
